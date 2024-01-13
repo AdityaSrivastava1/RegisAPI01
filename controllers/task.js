@@ -1,70 +1,203 @@
-import ErrorHandler from "../middlewares/error.js";
+
+// import { Task } from "../models/task.js";
+
+// export const newTask = async (req, res, next) => {
+
+//     const { title, description } = req.body;
+
+//     await Task.create({
+//       title,
+//       description,
+//       user: req.user,
+//     });
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Task added Successfully",
+//     });
+
+// };
+
+// export const getMyTask = async (req, res, next) => {
+  
+//     const userid = req.user._id;
+
+//     const tasks = await Task.find({ user: userid });
+
+//     res.status(200).json({
+//       success: true,
+//       tasks,
+//     });
+  
+ 
+// };
+
+// export const updateTask = async (req, res, next) => {
+ 
+//     const task = await Task.findById(req.params.id);
+
+//     if (!task) return next(new ErrorHandler("Task not found", 404));
+
+//     task.isCompleted = !task.isCompleted;
+//     await task.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Task Updated!",
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+// export const deleteTask = async (req, res, next) => {
+//   try {
+//     const task = await Task.findById(req.params.id);
+
+//     if (!task) return next(new ErrorHandler("Task not found", 404));
+//     await task.deleteOne();
+
+//     res.status(200).json({
+//       message: "Task Deleted!",
+//       success: true,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 import { Task } from "../models/task.js";
 
-export const newTask = async (req, res, next) => {
-  try {
-    const { title, description } = req.body;
+export const newTask = async (req,res,next) =>{
 
+    const {title,description} = req.body;
+ 
     await Task.create({
-      title,
-      description,
-      user: req.user,
+        title,
+        description,
+        user:req.user,
+
     });
+    res.status(201)
+    .json({
+        success:true,
+        message:"Task added Successfully",
+    }) 
+}
 
-    res.status(201).json({
-      success: true,
-      message: "Task added Successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+export const getMyTask = async(req,res,next)=>{
 
-export const getMyTask = async (req, res, next) => {
-  try {
-    const userid = req.user._id;
+    const userId = req.user._id;
+    
 
-    const tasks = await Task.find({ user: userid });
+    //jp login user hai uski id match ho jaegi task k userid k sath
+    //sirf usi user ka task show krega
+    const tasks = await Task.find({user:userId});
+
 
     res.status(200).json({
-      success: true,
-      tasks,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+        success:true,
+        tasks
+    })
+}
+
+
+// export const updateTask = async(req,res,next)=>{
+
+//     const {id} = req.params;
+//     const task = await Task.findById(id);
+//     if(!task){
+//         res.status(404).json({
+//             success:false,
+//             message:"Invalid ID or no task found to update "
+//         })
+//     }
+
+//     task.isCompleted = !task.isCompleted;
+
+//     await task.save();
+
+
+//     res.status(200).json({
+//         success:true,
+//         message:"Task updated"
+//     })
+// }
+
 
 export const updateTask = async (req, res, next) => {
-  try {
-    const task = await Task.findById(req.params.id);
+    try {
+        const { id } = req.params;
+        const task = await Task.findById(id);
 
-    if (!task) return next(new ErrorHandler("Task not found", 404));
+        if (!task) {
+            return res.status(404).json({
+                success: false,
+                message: "Invalid ID or no task found to update"
+            });
+        }
 
-    task.isCompleted = !task.isCompleted;
-    await task.save();
+        task.isCompleted = !task.isCompleted;
+        await task.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Task Updated!",
-    });
-  } catch (error) {
-    next(error);
-  }
+        res.status(200).json({
+            success: true,
+            message: "Task updated"
+        });
+    } catch (error) {
+        // Handle any errors that might occur during the operation
+        console.error("Error updating task:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to update task"
+        });
+    }
 };
+
+
+// export const deleteTask = async(req,res,next)=>{
+
+//     const {id} = req.params;
+//     const task = await Task.findById(id);
+
+//     if(!task){
+//         res.status(404).json({
+//             success:false,
+//             message:"Invalid ID or no task found"
+//         })
+//     }
+
+//     await task.deleteOne();
+
+//     res.status(200).json({
+//         success:true,
+//         message:"Task deleted"
+//     })
+// }
 
 export const deleteTask = async (req, res, next) => {
-  try {
-    const task = await Task.findById(req.params.id);
+    const { id } = req.params;
+    const task = await Task.findById(id);
 
-    if (!task) return next(new ErrorHandler("Task not found", 404));
-    await task.deleteOne();
+    if (!task) {
+        return res.status(404).json({
+            success: false,
+            message: "Invalid ID or no task found"
+        });
+    }
 
-    res.status(200).json({
-      message: "Task Deleted!",
-      success: true,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+
+    try {
+        await task.deleteOne();
+        res.status(200).json({
+            success: true,
+            message: "Task deleted"
+        });
+    } catch (error) {
+        // Handle any database-related errors here
+        res.status(500).json({
+            success: false,
+            message: "Error deleting task"
+        });
+    }
+}
