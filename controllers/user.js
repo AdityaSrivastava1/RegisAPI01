@@ -26,9 +26,7 @@ export const login = async (req, res, next) => {
     }
 
     sendCookie(user, res, `Welcome back, ${user.name}`, 200);
-  } catch (error) {
-    next(error);
-  }
+  } 
 };
 
 export const register = async (req, res) => {
@@ -49,9 +47,7 @@ export const register = async (req, res) => {
     user = await User.create({ name, email, password: hashedPassword });
 
     sendCookie(user, res, "Registered Successfully", 201);
-  } catch (error) {
-    next(error);
-  }
+  } 
 };
 
 export const getMyProfile = (req, res) => {
